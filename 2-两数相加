@@ -1,0 +1,281 @@
+# 题目
+给定两个非空链表来代表两个非负整数，位数按照逆序方式存储，它们的每个节点只存储单个数字。将这两数相加会返回一个新的链表。
+
+你可以假设除了数字 0 之外，这两个数字都不会以零开头。
+
+**示例：**
+>
+>输入：(2 -> 4 -> 3) + (5 -> 6 -> 4)
+>
+>输出：7 -> 0 -> 8
+>
+>原因：342 + 465 = 807
+
+# 注意点
+
+要注意边界条件啊，就是特殊情况下的，比如`1->9 + 2 = 3->9`
+
+又比如`5 + 5 = 0->1`等。
+
+# 这是我写的执行时间为20ms的代码：
+
+效果如下：
+![](https://note.youdao.com/yws/public/resource/f607475660fca65fe48eea10a2cffe46/xmlnote/62249B077EFE4AA7AC404728841CE76B/7955)
+```cpp
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     struct ListNode *next;
+ * };
+ */
+struct ListNode* addTwoNumbers(struct ListNode* l1, struct ListNode* l2) {
+    struct ListNode* newroot = NULL;
+    struct ListNode *node1;
+    struct ListNode* cur_node = NULL;
+    int overflow = 0;
+
+    
+    while(l1||l2||overflow){
+        node1 = (struct ListNode*)malloc(sizeof(struct ListNode));
+        node1->next = NULL;
+        
+        if(newroot == NULL){
+            newroot = node1;
+            cur_node = node1;
+        }
+        else{
+            cur_node->next = node1;
+            cur_node =  node1;
+        }
+        
+        if(l1 != NULL && l2 != NULL){
+            if((l1->val + l2->val + overflow) >= 10){
+                cur_node->val = (l1->val + l2->val + overflow) - 10;
+                overflow = 1;
+            }
+            else{
+                cur_node->val = (l1->val + l2->val + overflow);
+                overflow = 0;
+            }
+            
+            l1 = l1->next;
+            l2 = l2->next;
+        }
+        else{
+            if(l1 != NULL){
+                cur_node->val = l1->val + overflow;
+                l1 = l1->next;
+            }
+            else if(l2 != NULL){
+                cur_node->val = l2->val + overflow;
+                l2 = l2->next;
+            }
+            else{ 
+                if(overflow){
+                    cur_node->val = overflow;
+                    
+                }
+                break;
+            }
+         if(cur_node->val >= 10){
+             cur_node->val -= 10;
+             overflow = 1;
+         }
+        else{
+               overflow = 0; 
+            }
+          
+        }
+        
+    }
+    
+    return newroot;
+}
+```
+
+# 这是24ms里面做的比较好的
+```c
+//  //Definition for singly-linked list.
+ // struct ListNode {
+ //      int val;
+ //     struct ListNode *next;
+ //  };
+
+struct ListNode* addTwoNumbers(struct ListNode* l1, struct ListNode* l2) {
+    if(l1 == NULL){
+        return l2;
+    }else if(l2 == NULL) {
+        return l1;
+    }
+    int carry = 0;
+    struct ListNode* p1 = l1, *p2 = l2,*tail,*result;
+    result = (struct ListNode*)malloc(sizeof(struct ListNode));
+    result -> val = (p1 -> val + p2 -> val) % 10;
+    tail = result;
+    carry = (p1 -> val + p2 -> val) / 10;
+    p1 = p1 -> next;
+    p2 = p2 -> next;
+    while(p1!=NULL && p2!=NULL) {
+        tail -> next = (struct ListNode*)malloc(sizeof(struct ListNode));
+        tail = tail -> next;
+        tail -> val = (carry + p1 -> val + p2 -> val) % 10; // current 
+        carry = (carry + p1 -> val + p2 -> val) / 10;  // carry
+        p1 = p1 -> next;
+        p2 = p2 -> next;
+    }
+    
+    if(p1!=NULL) {
+        while(p1){
+            tail -> next = (struct ListNode*)malloc(sizeof(struct ListNode));
+            tail = tail -> next;
+            tail -> val = (carry + p1 -> val) % 10; // current pos
+            carry = (carry + p1 -> val) / 10;    // carry pos
+            p1 = p1 -> next;
+        }
+    }
+    if(p2!=NULL) {
+        while(p2){
+            tail -> next = (struct ListNode*)malloc(sizeof(struct ListNode));
+            tail = tail -> next;
+            tail -> val = (carry + p2 -> val) % 10; // current pos
+            carry = (carry + p2 -> val) / 10;    // carry pos
+            p2 = p2 -> next;
+        }
+    }
+    
+    if(carry == 0){
+        tail -> next = NULL;
+        return result;
+    }
+    
+    
+    tail -> next = (struct ListNode*)malloc(sizeof(struct ListNode));
+    tail = tail -> next;
+    tail -> val = carry;
+    tail -> next = NULL;
+    return result;
+}
+```
+
+# 这是别人执行时间为20ms的算法实现
+
+```cpp
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     struct ListNode *next;
+ * };
+ */
+struct ListNode* addTwoNumbers(struct ListNode* l1, struct ListNode* l2) {
+    struct ListNode *retVal = NULL;
+    struct ListNode *ptr = NULL;
+    int c = 0;
+    while(l1!=NULL || l2!=NULL||c !=0){
+        int a = 0,b = 0;
+        if(ptr==NULL) {
+            ptr = malloc(sizeof(struct ListNode));
+            ptr->next = NULL;
+            ptr->val = 0;
+        }else{
+            ptr->next = malloc(sizeof(struct ListNode));
+            ptr->next->next = NULL;
+            ptr=ptr->next;
+        }
+        if(retVal == NULL) 
+            retVal=ptr;
+        if(l1!=NULL){
+            a=l1->val;
+            l1=l1->next;
+        }
+        if(l2!=NULL) {
+            b=l2->val;
+            l2=l2->next;}
+        ptr->val =  ((a+b+c)%10);
+        if(a+b+c>=10){
+            c =1;
+        }else{
+            c =0;
+        }
+    }
+    return retVal;
+}
+```
+
+> **代码赏析：** 
+> 
+> 一眼就能看出来的是，别人的代码要比我的简洁，尤其是最高分的那个大佬。
+
+## 24ms优秀的代码
+
+作者一开始就考虑到了边界问题，假如有一条链是空的话我们就只要输出另外一条链就好了；
+
+其他的地方考虑的跟我一样，分为两条链均存在、链l1存在、链l2存在这三种情况进行讨论，但是处理方式不同，我的是三个情况放到一个总循环里面进行遍历，而作者则是先遍历完l1&&l2，然后才是l1，最后l2，这样子写**逻辑超级清晰啊！！！**佩服佩服！
+
+里面亮点的地方就是对进位的处理，里面是用：
+
+```cpp
+while(p1!=NULL && p2!=NULL) {
+        tail -> next = (struct ListNode*)malloc(sizeof(struct ListNode));
+        tail = tail -> next;
+        tail -> val = (carry + p1 -> val + p2 -> val) % 10; // current 
+        carry = (carry + p1 -> val + p2 -> val) / 10;  // carry
+        p1 = p1 -> next;
+        p2 = p2 -> next;
+    }
+```
+这一轮产生了一个进位，carry=1，那么下一轮的时候`carry = (carry + p1 -> val + p2 -> val) / 10;`这个操作使得carry的值要么为1，要么为0，因此绝对不会出现进位累积的情况。
+
+在l1和l2都存在的情况下，已处理完，那么接下来处理的就是单边问题了：
+```cpp
+if(p1!=NULL) {
+        while(p1){
+            tail -> next = (struct ListNode*)malloc(sizeof(struct ListNode));
+            tail = tail -> next;
+            tail -> val = (carry + p1 -> val) % 10; // current pos
+            carry = (carry + p1 -> val) / 10;    // carry pos
+            p1 = p1 -> next;
+        }
+    }
+    if(p2!=NULL) {
+        while(p2){
+            tail -> next = (struct ListNode*)malloc(sizeof(struct ListNode));
+            tail = tail -> next;
+            tail -> val = (carry + p2 -> val) % 10; // current pos
+            carry = (carry + p2 -> val) / 10;    // carry pos
+            p2 = p2 -> next;
+        }
+    }
+```
+
+处理完l1的就接着处理l2的，思路很清晰，逻辑不耦合，嗯，感觉很好。
+
+
+最后就是做下收尾操作，收一下边界。
+```c
+if(carry == 0){
+        tail -> next = NULL;
+        return result;
+    }
+    
+tail -> next = (struct ListNode*)malloc(sizeof(struct ListNode));
+tail = tail -> next;
+tail -> val = carry;
+tail -> next = NULL;
+return result;
+```
+
+## 20ms 牛逼的代码赏析
+
+```c
+struct ListNode *retVal = NULL;
+    struct ListNode *ptr = NULL;
+    int c = 0;
+```
+
+首先定义变量，一个ptr指针来移动的，retVal是返回的链表指针；
+
+先开一个大循环（这思路跟我的差不多啊），只要l1、l2、进位c之间有一个不为空我就得操劳：
+
+其他的跟我一样第一次进来就创建一个空的表头Node，并且把ptr跟retVal都指向这，后面就是把数据加起来，知识这里的策略是：**l1跟l2分开记录，然后夹起来做处理，也就是取数据跟数据的逻辑处理是分开来的，我取数据就专心地取，逻辑处理留给后面那哥们去干就好了，自己的任务单一明确有出口**，嗯，你很棒棒哟~
