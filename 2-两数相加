@@ -5,11 +5,11 @@
 
 **示例：**
 >
->输入：(2 -> 4 -> 3) + (5 -> 6 -> 4)
+> 输入：(2 -> 4 -> 3) + (5 -> 6 -> 4)
 >
->输出：7 -> 0 -> 8
+> 输出：7 -> 0 -> 8
 >
->原因：342 + 465 = 807
+> 原因：342 + 465 = 807
 
 # 注意点
 
@@ -20,8 +20,10 @@
 # 这是我写的执行时间为20ms的代码：
 
 效果如下：
+
 ![](https://note.youdao.com/yws/public/resource/f607475660fca65fe48eea10a2cffe46/xmlnote/62249B077EFE4AA7AC404728841CE76B/7955)
 ```cpp
+
 /**
  * Definition for singly-linked list.
  * struct ListNode {
